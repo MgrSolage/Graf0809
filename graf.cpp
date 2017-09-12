@@ -1,240 +1,251 @@
 #include "graf.h"
-#include <iostream>
-#include <fstream>
+using namespace std;
 
-Graf::Graf()
+void graf_bmp_write (string filename, graf_file_struct* graf_file)
 	{
-
-	}
-
-Graf BMPFileWrite (std::ofstream & outfile)
-	{
-		if (outfile.is_open()!=1)
+		ofstream file;
+		file.open(filename, ios::binary);
+		if (file.is_open()!=1)
 			{
-			std::cerr << "Failed in creating" << std::endl;
+			cerr << "Failed in creating" << endl;
 			exit(1);
 			}
 
-		Graf4ByteUnion *temp_u = new Graf4ByteUnion;
+		graf_4byte *temp_u = new graf_4byte;
 
-		outfile.write("BM", 2);
+		file.write("BM", 2);
 
-		temp_u->s4Byte = head.fileSize;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->head.file_size;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s2Byte[0] = Graf.head.reserved1;
-		temp_u->s2Byte[1] = head.reserved2;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s2byte[0] = graf_file->head.reserved1;
+		temp_u->s2byte[1] = graf_file->head.reserved2;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::head.offset;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->head.offset;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::head.infoSize;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->head.info_size;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.width;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.width;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.height;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.height;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s2Byte[0] = Graf::info.planes;
-		outfile.write(temp_u->s1Byte, 2);
+		temp_u->s2byte[0] = graf_file->info.planes;
+		file.write(temp_u->s1byte, 2);
 
-		temp_u->s2Byte[0] = Graf::info.bits;
-		outfile.write(temp_u->s1Byte, 2);
+		temp_u->s2byte[0] = graf_file->info.bits;
+		file.write(temp_u->s1byte, 2);
 
-		temp_u->s4Byte = Graf::info.compression;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.compression;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.imageSize;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.imagesize;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.xResolution;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.xresolution;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.yResolution;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.yresolution;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.nColours;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.ncolours;
+		file.write(temp_u->s1byte, 4);
 
-		temp_u->s4Byte = Graf::info.importantColours;
-		outfile.write(temp_u->s1Byte, 4);
+		temp_u->s4byte = graf_file->info.importantcolours;
+		file.write(temp_u->s1byte, 4);
 
-		int RowPBits = Graf::info.bits*info.width;
-		unsigned short RowBytes = ((Graf::info.bits*Graf::info.width+31)/32)*4;
-		unsigned short Padding;
-		if ((8*RowBytes-RowPBits)%32){
-			Padding = (8*RowBytes-RowPBits)/8;
+		int graf_row_pbits = graf_file->info.bits*graf_file->info.width;
+		unsigned short graf_row_bytes = ((graf_file->info.bits*graf_file->info.width+31)/32)*4;
+		unsigned short graf_padding;
+		if ((8*graf_row_bytes-graf_row_pbits)%32){
+			graf_padding = (8*graf_row_bytes-graf_row_pbits)/8;
 			}
 		else{
-			Padding = 0;
+			graf_padding = 0;
 			}
 
-		if (Graf::type == BMPRGB24){
-			for (int i = info.height-1; i >= 0; i--){
-				outfile.write(RGB24b[i*info.width].s1byte, RowBytes-Padding);
-				temp_u->s4Byte = 0;
-				outfile.write(temp_u->s1Byte, Padding);
+//		if (file.tellg() != graf_file->head.offset){
+//			cerr << "Head another than expected" << endl;
+//			graf_file->head.offset = file.tellg();
+//			}
+
+		if (graf_file->type == bmp_rgb24){
+			for (int i = graf_file->info.height-1; i >= 0; i--){
+				file.write(graf_file->graf_RGB_24b[i*graf_file->info.width].s1byte, graf_row_bytes-graf_padding);
+/*				for (int j = 0; j < graf_file->info.width; j++){
+					cout << (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.red << ' ' \
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.green << ' '\
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.blue << "   ";
+					}
+*/
+				temp_u->s4byte = 0;
+				file.write(temp_u->s1byte, graf_padding);
+//				cout << file.tellg() << endl;
 				}
 
 
 			delete temp_u;
-			outfile.close();
+			file.close();
 			}
 	}
 
-Graf BMPFileRead (std::ifstream & infile)
+void graf_bmp_read (string filename, graf_file_struct* graf_file)
 	{
-		if (infile.is_open()!=1)
+		ifstream file;
+		file.open(filename, ios::binary);
+		if (file.is_open()!=1)
 			{
-			std::cerr << "Failed in opening" << std::endl;
+			cerr << "Failed in opening" << endl;
 			exit(1);
 			}
 
-		Graf4ByteUnion *temp_u = new Graf4ByteUnion;
+		graf_4byte *temp_u = new graf_4byte;
 
-		infile.read(temp_u->s1Byte, 2);
-		Graf::head.type = temp_u->s2Byte[0];
-		if (Graf::head.type != 0x4d42){
-			std::cout << "Incorrect header(hex): " << std::hex << Graf::head.type << std::endl;
-			bool warn = infile.fail();
+		file.read(temp_u->s1byte, 2);
+		graf_file->head.type = temp_u->s2byte[0];
+		if (graf_file->head.type != 0x4d42){
+			cout << "Incorrect header(hex): " << hex << graf_file->head.type << endl;
+			bool warn = file.fail();
 			if (warn){
-				std::cout << "File failed somehow" << std::endl;
+				cout << "File failed somehow" << endl;
 				}
 			else{
-				std::cout << "Reading not failed" << std::endl;
+				cout << "Reading not failed" << endl;
 				}
 			exit(2);
 			}
 
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::head.fileSize = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->head.file_size = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::head.reserved1=temp_u->s2Byte[0];
-		Graf::head.reserved2=temp_u->s2Byte[1];
-		if (Graf::head.reserved1!=0||Graf::head.reserved2!=0){
-			std::cerr << "Reserved bytes invalid";
+		file.read(temp_u->s1byte, 4);
+		graf_file->head.reserved1=temp_u->s2byte[0];
+		graf_file->head.reserved2=temp_u->s2byte[1];
+		if (graf_file->head.reserved1!=0||graf_file->head.reserved2!=0){
+			cerr << "Reserved bytes invalid";
 			exit(2);
 			}
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::head.offset = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->head.offset = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::head.infoSize = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->head.info_size = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.width = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.width = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.height = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.height = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 2);
-		Graf::info.planes = temp_u->s2Byte[0];
+		file.read(temp_u->s1byte, 2);
+		graf_file->info.planes = temp_u->s2byte[0];
 
-		infile.read(temp_u->s1Byte, 2);
-		Graf::info.bits = temp_u->s2Byte[0];
+		file.read(temp_u->s1byte, 2);
+		graf_file->info.bits = temp_u->s2byte[0];
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.compression = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.compression = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.imageSize = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.imagesize = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.xResolution = temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.xresolution = temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.yResolution= temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.yresolution= temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.nColours= temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.ncolours= temp_u->s4byte;
 
-		infile.read(temp_u->s1Byte, 4);
-		Graf::info.importantColours= temp_u->s4Byte;
+		file.read(temp_u->s1byte, 4);
+		graf_file->info.importantcolours= temp_u->s4byte;
 
-		if (Graf::info.compression!=0){
-			std::cerr << "Unsupported BMP compression";
+		if (graf_file->info.compression!=0){
+			cerr << "Unsupported BMP compression";
 			exit(3);
 			}
-		int RowPBits = Graf::info.bits*Graf::info.width;
-		unsigned short RowBytes = ((Graf::info.bits*Graf::info.width+31)/32)*4;
-		unsigned short Padding;
-		if ((8*RowBytes-RowPBits)%32){
-			Padding = (8*RowBytes-RowPBits)/8;
+		int graf_row_pbits = graf_file->info.bits*graf_file->info.width;
+		unsigned short graf_row_bytes = ((graf_file->info.bits*graf_file->info.width+31)/32)*4;
+		unsigned short graf_padding;
+		if ((8*graf_row_bytes-graf_row_pbits)%32){
+			graf_padding = (8*graf_row_bytes-graf_row_pbits)/8;
 			}
 		else{
-			Padding = 0;
+			graf_padding = 0;
 			}
 
-		if (infile.tellg() != Graf::head.offset){
-			std::cerr << "Head longer than expected" <<std::endl;
-			infile.seekg(Graf::head.offset);
+		if (file.tellg() != graf_file->head.offset){
+			cerr << "Head longer than expected" <<endl;
+			file.seekg(graf_file->head.offset);
 			}
 
 
-		if (Graf::info.bits == 24){
-			type = BMPRGB24;
-			RGB24b = new RGB24bUnion[Graf::info.height*Graf::info.width];
+		if (graf_file->info.bits == 24){
+			graf_file->type = bmp_rgb24;
+			graf_file->graf_RGB_24b = new graf_RGB_24b_union[graf_file->info.height*graf_file->info.width];
 
-			for (int i = Graf::info.height-1; i >= 0 && infile.eof()!=1; i--){
-				infile.read(RGB24b[i*info.width].s1byte, RowBytes-Padding);
+			for (int i = graf_file->info.height-1; i >= 0 && file.eof()!=1; i--){
+				file.read(graf_file->graf_RGB_24b[i*graf_file->info.width].s1byte, graf_row_bytes-graf_padding);
 
-				temp_u->s4Byte = 0;
-				infile.read(temp_u->s1Byte, Padding);
-				if (temp_u->s4Byte != 0){
-					std::cerr << "Padding error";
+				temp_u->s4byte = 0;
+				file.read(temp_u->s1byte, graf_padding);
+//				cout << file.tellg() << endl;
+				if (temp_u->s4byte != 0){
+					cerr << "Padding error";
 					}
 				}
 
 			delete temp_u;
-			infile.close();
+			file.close();
 			}
 	}
 
-Graf Graf::FilePrint (bool ShowHead, bool ShowInfo){
-		if (type == BMPRGB24){
-			if (ShowHead){
-				std::cout << "Magic(hex)       = " << std::hex << Graf::head.type << std::endl;
-				std::cout << "File size(dec)   = " << std::dec << Graf::head.fileSize << std::endl;
-				std::cout << "Reserved(dec)    = " << Graf::head.reserved1 << " & " << Graf::head.reserved2<< std::endl;
-				std::cout << "Offset(dec)      = " << Graf::head.offset << std::endl;
-				std::cout << "Header size(dec) = " << Graf::head.infoSize << std::endl;
+void graf_print (graf_file_struct *graf_file, bool show_head, bool show_info){
+		if (graf_file->type == bmp_rgb24){
+			if (show_head){
+				cout << "Magic(hex)       = " << hex << graf_file->head.type << endl;
+				cout << "File size(dec)   = " << dec << graf_file->head.file_size << endl;
+				cout << "Reserved(dec)    = " << dec << graf_file->head.reserved1 << " & " << graf_file->head.reserved2<< endl;
+				cout << "Offset(dec)      = " << dec << graf_file->head.offset << endl;
+				cout << "Header size(dec) = " << dec << graf_file->head.info_size << endl;
 				}
-			if (ShowInfo){
-				std::cout << "Width(dec)             = " << Graf::info.width << std::endl;
-				std::cout << "Height(dec)            = " << std::dec << Graf::info.height << std::endl;
-				std::cout << "Planes(dec)            = " << Graf::info.planes << std::endl;
-				std::cout << "Bits per pixel(dec)    = " << Graf::info.bits << std::endl;
-				std::cout << "Compression(dec)       = " << Graf::info.compression << std::endl;
-				std::cout << "Image size(dec)        = " << Graf::info.imageSize << std::endl;
-				std::cout << "X pix per meter(dec)   = " << Graf::info.xResolution<< std::endl;
-				std::cout << "Y pix per emeter(dec)  = " << Graf::info.yResolution << std::endl;
-				std::cout << "Number of colours(dec) = " << Graf::info.nColours<< std::endl;
-				std::cout << "Colors important(dec)  = " << Graf::info.importantColours << std::endl;
+			if (show_info){
+				cout << "Width(dec)             = " << dec << graf_file->info.width << endl;
+				cout << "Height(dec)            = " << dec << graf_file->info.height << endl;
+				cout << "Planes(dec)            = " << dec << graf_file->info.planes << endl;
+				cout << "Bits per pixel(dec)    = " << dec << graf_file->info.bits << endl;
+				cout << "Compression(dec)       = " << dec << graf_file->info.compression << endl;
+				cout << "Image size(dec)        = " << dec << graf_file->info.imagesize << endl;
+				cout << "X pix per meter(dec)   = " << dec << graf_file->info.xresolution<< endl;
+				cout << "Y pix per emeter(dec)  = " << dec << graf_file->info.yresolution << endl;
+				cout << "Number of colours(dec) = " << dec << graf_file->info.ncolours<< endl;
+				cout << "Colors important(dec)  = " << dec << graf_file->info.importantcolours << endl;
 				}
 
-			for (int i = Graf::info.height-1; i >= 0; i--){
-				for (int j = 0; j < Graf::info.width; j++){
-					std::cout << (int)RGB24b[i*Graf::info.width+j].colour.red << ' ' \
-						<< (int)RGB24b[i*Graf::info.width+j].colour.green << ' '\
-						<< (int)RGB24b[i*Graf::info.width+j].colour.blue << "   ";
+			for (int i = graf_file->info.height-1; i >= 0; i--){
+				for (int j = 0; j < graf_file->info.width; j++){
+					cout << (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.red << ' ' \
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.green << ' '\
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.blue << "   ";
 					}
 				}
 			}
 
 	}
 
-Graf Graf::Negative (void){
-	if (type==BMPRGB24){
-		for (int i = 0; i < Graf::info.width*Graf::info.height; i++){
-			RGB24b[i].s1byte[0] = ~RGB24b[i].s1byte[0];
-			RGB24b[i].s1byte[1] = ~RGB24b[i].s1byte[1];
-			RGB24b[i].s1byte[2] = ~RGB24b[i].s1byte[2];
+void graf_negative (graf_file_struct *graf_file){
+	if (graf_file->type==bmp_rgb24){
+		for (int i = 0; i < graf_file->info.width*graf_file->info.height; i++){
+			graf_file->graf_RGB_24b[i].s1byte[0] = ~graf_file->graf_RGB_24b[i].s1byte[0];
+			graf_file->graf_RGB_24b[i].s1byte[1] = ~graf_file->graf_RGB_24b[i].s1byte[1];
+			graf_file->graf_RGB_24b[i].s1byte[2] = ~graf_file->graf_RGB_24b[i].s1byte[2];
 			}
 		}
 	}
