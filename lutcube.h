@@ -7,16 +7,18 @@
 
 using namespace std;
 
+enum LUTState { OK = 0, NotInitialized = 1,
+				ReadError = 10, WriteError, PrematureEndOfFile, LineError,
+				UnknownOrRepeatedKeyword = 20, TitleMissingQuote, DomainBoundsReversed,
+				LUTSizeOutOfRange, CouldNotParseTableData };
+
+typedef vector <float> tableRow;
+typedef vector <tableRow> table1D;
+typedef vector <table1D> table2D;
+typedef vector <table2D> table3D;
+
 class LUTCube {
 public:
-	typedef vector <float> tableRow;
-	typedef vector <tableRow> table1D;
-	typedef vector <table1D> table2D;
-	typedef vector <table2D> table3D;
-	enum LUTState { OK = 0, NotInitialized = 1,
-					ReadError = 10, WriteError, PrematureEndOfFile, LineError,
-					UnknownOrRepeatedKeyword = 20, TitleMissingQuote, DomainBoundsReversed,
-					LUTSizeOutOfRange, CouldNotParseTableData };
 	LUTState status;
 	string title;
 	tableRow domainMin;
@@ -26,8 +28,9 @@ public:
 	LUTCube ( void ) { status = NotInitialized; };
 	LUTState LoadCubeFile ( ifstream & infile );
 	LUTState SaveCubeFile ( ofstream & outfile );
-private:
-	string ReadLine ( ifstream & infile, char lineSeparator);
-	tableRow ParseTableRow ( const string & lineOfText );
 };
+
+tableRow ParseTableRow ( const string & lineOfText, LUTState & status );
+string ReadLine (ifstream & infile, char lineSeparator, LUTState & status);
+
 #endif // LUTCUBE_H

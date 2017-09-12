@@ -3,19 +3,19 @@
 #include <iostream>
 #include <sstream>
 
-string LUTCube:: ReadLine ( ifstream & infile, char lineSeparator )
+string ReadLine ( ifstream & infile, char Delimiter, LUTState &status)
 	{
 		// Skip empty lines and comments
 		const char CommentMarker = '#';
 		string textLine("");
 		while ( textLine.size() == 0 || textLine[0] == CommentMarker ) {
 			if ( infile.eof() ) { status = PrematureEndOfFile; break; }
-			getline ( infile, textLine, lineSeparator );
+			getline ( infile, textLine, Delimiter );
 			if ( infile.fail() ) { status = ReadError; break; }
 			}
 		return textLine;
 	} // ReadLine
-vector <float> LUTCube:: ParseTableRow ( const string & lineOfText )
+tableRow ParseTableRow ( const string & lineOfText, LUTState &status )
 	{
 		int N = 3;
 		tableRow f ( N );
@@ -26,7 +26,7 @@ vector <float> LUTCube:: ParseTableRow ( const string & lineOfText )
 			}
 		return f;
 	} // ParseTableRow
-LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
+LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 	{
 		// Set defaults
 		status = OK;
@@ -37,15 +37,15 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 		LUT3D.clear();
 		// Read file data line by line
 		const char NewlineCharacter = '\n';
-		char lineSeparator = NewlineCharacter;
-		// sniff use of legacy lineSeparator
+		char Delimiter = NewlineCharacter;
+		// check if delimiter is old
 		const char CarriageReturnCharacter = '\r';
 		for (int i = 0; i < 255; i++) {
 			char inc = infile.get();
 			if ( inc == NewlineCharacter ) break;
 			if ( inc == CarriageReturnCharacter ) {
 				if ( infile.get() == NewlineCharacter ) break;
-				lineSeparator = CarriageReturnCharacter;
+				Delimiter = CarriageReturnCharacter;
 				clog << "INFO: This file uses non-compliant line separator \\r (0x0D)" << endl;
 				break;
 				}
@@ -60,7 +60,7 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 		N = CntTitle = CntSize = CntMin = CntMax = 0;
 		while ( status == OK ) {
 			long linePos = infile.tellg();
-			string lineOfText = ReadLine ( infile, lineSeparator );
+			string lineOfText = ReadLine ( infile, Delimiter, status );
 			if ( ! status == OK ) break;
 			// Parse keywords and parameters
 			istringstream line ( lineOfText );
@@ -71,25 +71,31 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 				// restore stream pos to re-read line of data
 				infile.seekg ( linePos );
 				break;
-				} else if ( keyword == "TITLE" && CntTitle++ == 0 ) {
+				}
+			else if ( keyword == "TITLE" && CntTitle++ == 0 ) {
 				const char QUOTE = '"';
 				char startOfTitle;
 				line >> startOfTitle;
 				if ( startOfTitle != QUOTE ) { status = TitleMissingQuote; break; }
 				getline ( line, title, QUOTE ); // read to "
-				} else if ( keyword == "DOMAIN_MIN" && CntMin++ == 0 ) {
+				}
+			else if ( keyword == "DOMAIN_MIN" && CntMin++ == 0 ) {
 				line >> domainMin[0] >> domainMin[1] >> domainMin[2];
-				} else if ( keyword == "DOMAIN_MAX" && CntMax++ == 0 ) {
+				}
+			else if ( keyword == "DOMAIN_MAX" && CntMax++ == 0 ) {
 				line >> domainMax[0] >> domainMax[1] >> domainMax[2];
-				} else if ( keyword == "LUT_1D_SIZE" && CntSize++ == 0 ) {
+				}
+			else if ( keyword == "LUT_1D_SIZE" && CntSize++ == 0 ) {
 				line >> N;
 				if ( N < 2 || N > 65536 ) { status = LUTSizeOutOfRange; break; }
 				LUT1D = table1D ( N, tableRow ( 3 ) );
-				} else if ( keyword == "LUT_3D_SIZE" && CntSize++ == 0 ) {
+				}
+			else if ( keyword == "LUT_3D_SIZE" && CntSize++ == 0 ) {
 				line >> N;
 				if ( N < 2 || N > 256 ) { status = LUTSizeOutOfRange; break; }
 				LUT3D = table3D ( N, table2D ( N, table1D ( N, tableRow ( 3 ) ) ) );
-				} else { status = UnknownOrRepeatedKeyword; break; }
+				}
+			else { status = UnknownOrRepeatedKeyword; break; }
 			if ( line.fail() ) { status = ReadError; break; }
 			} // read keywords
 		if ( status == OK && CntSize == 0 ) status = LUTSizeOutOfRange;
@@ -100,7 +106,7 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 		if ( LUT1D.size() > 0 ) {
 			N = LUT1D.size();
 			for ( int i = 0; i < N && status == OK; i++ ) {
-				LUT1D [i] = ParseTableRow ( ReadLine ( infile, lineSeparator ) );
+				LUT1D [i] = ParseTableRow ( ReadLine ( infile, Delimiter, status ), status );
 				}
 			} else {
 			N = LUT3D.size();
@@ -109,7 +115,7 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 				for ( int g = 0; g < N && status == OK; g++ ) {
 					for ( int r = 0; r < N && status == OK; r++ ) {
 						LUT3D[r][g][b] = ParseTableRow
-								( ReadLine ( infile, lineSeparator ) );
+								( ReadLine ( infile, Delimiter, status ), status );
 						}
 					}
 				}
@@ -118,7 +124,7 @@ LUTCube:: LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 		return status;
 
 	} // LoadCubeFile
-LUTCube:: LUTState LUTCube:: SaveCubeFile ( ofstream & outfile )
+LUTState LUTCube:: SaveCubeFile ( ofstream & outfile )
 	{
 		if ( ! status == OK ) return status; // Write only good Cubes
 		// Write keywords
@@ -154,7 +160,7 @@ LUTCube:: LUTState LUTCube:: SaveCubeFile ( ofstream & outfile )
 		return ( outfile.good() ? OK : WriteError );
 	} // SaveCubeFile
 
-int TestCube (int argc, char * const argv[])
+int main (int argc, char * const argv[])
 	{
 		LUTCube theCube;
 		enum { OK = 0, ErrorOpenInFile = 100, ErrorOpenOutFile };
