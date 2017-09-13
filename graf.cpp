@@ -230,6 +230,7 @@ void graf_print (graf_file_struct *graf_file, bool show_head, bool show_info){
 						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour[1] << ' '\
 						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour[2] << "   ";
 					}
+				cout << endl;
 				}
 			}
 
@@ -245,21 +246,41 @@ void graf_negative (graf_file_struct *graf_file){
 		}
 	}
 
-double delta (unsigned char colour, int N, int &wynik){
+double delta (unsigned char colour, int N, int &wynik, double DomainMin, double DomainSpan, double MaxColorValue){
 		double remainder, int_part;
-		remainder = colour*N/255.0; //8 bit per colour
+		remainder = DomainMin + colour*N*DomainSpan/MaxColorValue;
 		remainder = modf(remainder, &int_part);
 		wynik = int_part;
 		return remainder;
 	}
 
 void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube){
-		if (!theCube.LUT1D.empty()) { //1D LUT
-			//for i
-			//for j
+		double debug;
+		double MaxColorValue = pow(2, graf_file->info.bits/3)-1;
+		int N = theCube.LUT1D.size();
+		double domainSpan[3];
+		domainSpan[0] = theCube.domainMax[0] - theCube.domainMin[0];
+		domainSpan[1] = theCube.domainMax[1] - theCube.domainMin[1];
+		domainSpan[2] = theCube.domainMax[2] - theCube.domainMin[2];
+		if (N) { //1D LUT
+			N--;
 			int integer;
-		//	delta()
+			double remainder;
+			int limit = graf_file->info.height*graf_file->info.width;
+			for (int i = 0; i < limit; i++){
+				for (int j = 0; j < 3; j++){
+					remainder = delta(graf_file->graf_RGB_24b[i].colour[j], N, integer, theCube.domainMin[j], domainSpan[j], MaxColorValue);
+					if (integer == N){
+						graf_file->graf_RGB_24b[i].s1byte[j] = theCube.LUT1D[integer][j]*MaxColorValue;
+						}
+					else{
+						debug = (theCube.LUT1D[integer][j] + remainder * (theCube.LUT1D[integer+1][j] - theCube.LUT1D[integer][j]));
+						debug = (debug*MaxColorValue);
+						debug = round(debug);
+						graf_file->graf_RGB_24b[i].colour[j] = debug;
+						}
 
-
+					}
+				}
 			}
-	};
+	}
