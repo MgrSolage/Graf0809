@@ -76,12 +76,7 @@ void graf_bmp_write (string filename, graf_file_struct* graf_file)
 		if (graf_file->type == bmp_rgb24){
 			for (int i = graf_file->info.height-1; i >= 0; i--){
 				file.write(graf_file->graf_RGB_24b[i*graf_file->info.width].s1byte, graf_row_bytes-graf_padding);
-/*				for (int j = 0; j < graf_file->info.width; j++){
-					cout << (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.red << ' ' \
-						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.green << ' '\
-						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.blue << "   ";
-					}
-*/
+
 				temp_u->s4byte = 0;
 				file.write(temp_u->s1byte, graf_padding);
 //				cout << file.tellg() << endl;
@@ -231,9 +226,9 @@ void graf_print (graf_file_struct *graf_file, bool show_head, bool show_info){
 
 			for (int i = graf_file->info.height-1; i >= 0; i--){
 				for (int j = 0; j < graf_file->info.width; j++){
-					cout << (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.red << ' ' \
-						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.green << ' '\
-						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour.blue << "   ";
+					cout << (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour[0] << ' ' \
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour[1] << ' '\
+						<< (int)graf_file->graf_RGB_24b[i*graf_file->info.width+j].colour[2] << "   ";
 					}
 				}
 			}
@@ -257,3 +252,14 @@ double delta (unsigned char colour, int N, int &wynik){
 		wynik = int_part;
 		return remainder;
 	}
+
+void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube){
+		if (!theCube.LUT1D.empty()) { //1D LUT
+			//for i
+			//for j
+			int integer;
+		//	delta()
+
+
+			}
+	};

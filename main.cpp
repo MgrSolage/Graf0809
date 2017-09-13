@@ -13,21 +13,17 @@ string test_dir = "C:/Users/Karol/Desktop/graftest/";
 int main()
 
 	{
-		unsigned char colour = 120;
-		int R0;
-		double delta_r = delta (colour, 62200, R0);
-		cout << R0 << " oraz reszta " << delta_r <<endl;
-/* Testy LUTów +++++++++++++++++++++++++++++++++++++++++++++========= */
-
-
-
-
-
-/* ============ wczytaj plik, negatyw, zapisz, wczytaj ===================
 		ifstream infile;
 		ofstream outfile;
 		graf_file_struct *image = new graf_file_struct;
 		infile.open(&test_filename[0], ios::binary);
+
+
+		unsigned char colour = 120;
+		int R0;
+		double delta_r = delta (colour, 62200, R0);
+		cout << R0 << " oraz reszta " << delta_r <<endl;
+
 
 		graf_bmp_read(&test_filename[0], image);
 		graf_print(image, 1, 1);
@@ -48,7 +44,6 @@ int main()
 		infile.close();
 
 		graf_print(image, 1, 1);
-*/
+
 		return 0;
 	}
-

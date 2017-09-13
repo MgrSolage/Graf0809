@@ -49,8 +49,8 @@ typedef struct
 
 typedef union
 {
-	char			    s1byte[3];
-	graf_RGB_24b_struct colour;
+	char      s1byte[3];
+	unsigned char colour[3];
 } graf_RGB_24b_union;
 
 enum type_enum {bmp_16, bmp_rgb24, bmp_argb32};
@@ -70,6 +70,7 @@ void graf_bmp_read (string filename, graf_file_struct* graf_file);
 void graf_print (graf_file_struct *graf_file, bool show_head, bool show_info);
 void graf_negative (graf_file_struct *graf_file);
 double delta (unsigned char colour, int N, int &wynik);
+void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube);
 
 
 #endif // GRAF_H
