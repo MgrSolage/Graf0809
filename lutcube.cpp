@@ -160,7 +160,7 @@ LUTState LUTCube:: SaveCubeFile ( ofstream & outfile )
 		return ( outfile.good() ? OK : WriteError );
 	} // SaveCubeFile
 
-int main (int argc, char * const argv[])
+int LUTTest (int argc, char * const argv[])
 	{
 		LUTCube theCube;
 		enum { OK = 0, ErrorOpenInFile = 100, ErrorOpenOutFile };

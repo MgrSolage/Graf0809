@@ -5,7 +5,7 @@
 #include "graf.h"
 
 using namespace std;
-/*
+
 string test_filename = "C:/Users/Karol/Desktop/graftest/24bb.bmp";
 string test_filename2 = "C:/Users/Karol/Desktop/graftest/chgd24bb.bmp";
 string test_dir = "C:/Users/Karol/Desktop/graftest/";
@@ -13,7 +13,10 @@ string test_dir = "C:/Users/Karol/Desktop/graftest/";
 int main()
 
 	{
-*/
+		unsigned char colour = 120;
+		int R0;
+		double delta_r = delta (colour, 62200, R0);
+		cout << R0 << " oraz reszta " << delta_r <<endl;
 /* Testy LUTów +++++++++++++++++++++++++++++++++++++++++++++========= */
 
 
@@ -45,7 +48,7 @@ int main()
 		infile.close();
 
 		graf_print(image, 1, 1);
+*/
 		return 0;
 	}
-*/
 

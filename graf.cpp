@@ -249,3 +249,11 @@ void graf_negative (graf_file_struct *graf_file){
 			}
 		}
 	}
+
+double delta (unsigned char colour, int N, int &wynik){
+		double remainder, int_part;
+		remainder = colour*N/255.0; //8 bit per colour
+		remainder = modf(remainder, &int_part);
+		wynik = int_part;
+		return remainder;
+	}
