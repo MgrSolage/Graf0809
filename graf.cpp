@@ -254,7 +254,7 @@ double delta (unsigned char colour, int N, int &wynik, double DomainMin, double 
 		return remainder;
 	}
 
-void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube){
+int graf_lut_it(graf_file_struct *graf_file, LUTCube theCube){
 		double debug;
 		double MaxColorValue = pow(2, graf_file->info.bits/3)-1;
 		int N = theCube.LUT1D.size();
@@ -283,4 +283,9 @@ void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube){
 					}
 				}
 			}
+		else {
+			cout << "Nieobslugiwana tablica LUT" << endl;
+			return 1;
+			}
+		return 0;
 	}

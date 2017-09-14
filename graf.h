@@ -64,13 +64,15 @@ typedef struct
 
 }graf_file_struct;
 
+enum grafStatus {saved = 0, empty = 1, onlyLoad = 2, altered = 3};
+
 
 void graf_bmp_write (string filename, graf_file_struct* graf_file);
 void graf_bmp_read (string filename, graf_file_struct* graf_file);
 void graf_print (graf_file_struct *graf_file, bool show_head, bool show_info);
 void graf_negative (graf_file_struct *graf_file);
 double delta (unsigned char colour, int N, int &wynik, double DomainSpan, double DomainMin, double MaxColorValue);
-void graf_lut_it (graf_file_struct *graf_file, LUTCube theCube);
+int graf_lut_it(graf_file_struct *graf_file, LUTCube theCube);
 
 
 #endif // GRAF_H

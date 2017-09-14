@@ -124,6 +124,7 @@ LUTState LUTCube:: LoadCubeFile ( ifstream & infile )
 		return status;
 
 	} // LoadCubeFile
+/*
 LUTState LUTCube:: SaveCubeFile ( ofstream & outfile )
 	{
 		if ( ! status == OK ) return status; // Write only good Cubes
@@ -201,3 +202,5 @@ int test (int argc, char * const argv[])
 			}
 		return OK;
 	}
+
+*/
